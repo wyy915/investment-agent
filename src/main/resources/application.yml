@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: harness-agent
+  datasource:
+    url: jdbc:mysql://localhost:3306/investment_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: root
+    password: 915728
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.investment.model
+  configuration:
+    map-underscore-to-camel-case: true
+server:
+  port: 8080
+agentscope:
+  dashscope:
+    api-key: sk-ws-H.EPREHIE.dgSV.MEUCIHRAoTaFay2CWc1_j-VCZMrO917765Du2_rKwbumBsHSAiEAkH_FzvpqEFSEzoXLzTSXnzaSzYgmWnl8zOCb_WqtjiE
+investment:
+  llm:
+    main-model: qwen-max
+    light-model: qwen-turbo
+  session:
+    max-history-turns: 10
+logging:
+  level:
+    com.investment: INFO
+

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.investment.mapper.ProductMapper">
+
+    <resultMap id="ProductItemRowMap" type="com.investment.model.ProductItemRow">
+        <id property="id" column="id"/>
+        <result property="sourceType" column="source_type"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="scopeType" column="scope_type"/>
+        <result property="scopeBranchId" column="scope_branch_id"/>
+        <result property="scopeManagerId" column="scope_manager_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productType" column="product_type"/>
+        <result property="riskLevel" column="risk_level"/>
+        <result property="investmentHorizon" column="investment_horizon"/>
+        <result property="liquidityType" column="liquidity_type"/>
+        <result property="minAmount" column="min_amount"/>
+        <result property="returnType" column="return_type"/>
+        <result property="targetCustomer" column="target_customer"/>
+        <result property="tags" column="tags"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="ProductColumns">
+        id,
+        source_type,
+        owner_user_id,
+        scope_type,
+        scope_branch_id,
+        scope_manager_id,
+        product_name,
+        product_code,
+        product_type,
+        risk_level,
+        investment_horizon,
+        liquidity_type,
+        min_amount,
+        return_type,
+        target_customer,
+        tags,
+        status,
+        created_at,
+        updated_at
+    </sql>
+
+    <insert id="insert"
+            parameterType="com.investment.model.ProductItemRow"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO investment_product (
+        source_type, owner_user_id, scope_type, scope_branch_id, scope_manager_id, product_name, product_code,
+        product_type, risk_level, investment_horizon, liquidity_type,
+        min_amount, return_type, target_customer, tags, status,
+        created_at, updated_at
+        ) VALUES (
+        #{sourceType}, #{ownerUserId}, #{scopeType}, #{scopeBranchId}, #{scopeManagerId}, #{productName}, #{productCode},
+        #{productType}, #{riskLevel}, #{investmentHorizon}, #{liquidityType},
+        #{minAmount}, #{returnType}, #{targetCustomer}, #{tags}, #{status},
+        NOW(), NOW()
+        )
+    </insert>
+
+    <update id="updatePersonal" parameterType="com.investment.model.ProductItemRow">
+        UPDATE investment_product
+        SET product_name = #{productName},
+        product_code = #{productCode},
+        scope_type = #{scopeType},
+        scope_branch_id = #{scopeBranchId},
+        scope_manager_id = #{scopeManagerId},
+        product_type = #{productType},
+        risk_level = #{riskLevel},
+        investment_horizon = #{investmentHorizon},
+        liquidity_type = #{liquidityType},
+        min_amount = #{minAmount},
+        return_type = #{returnType},
+        target_customer = #{targetCustomer},
+        tags = #{tags},
+        status = #{status},
+        updated_at = NOW()
+        WHERE id = #{id}
+        AND source_type = 'PERSONAL'
+        AND owner_user_id = #{ownerUserId}
+    </update>
+
+    <delete id="deletePersonal">
+        DELETE FROM investment_product
+        WHERE id = #{id}
+        AND source_type = 'PERSONAL'
+        AND owner_user_id = #{userId}
+    </delete>
+
+    <select id="findPersonalById" resultMap="ProductItemRowMap">
+        SELECT <include refid="ProductColumns"/>
+        FROM investment_product
+        WHERE id = #{id}
+        AND source_type = 'PERSONAL'
+        AND owner_user_id = #{userId}
+    </select>
+
+    <select id="findPersonalProducts" resultMap="ProductItemRowMap">
+        SELECT <include refid="ProductColumns"/>
+        FROM investment_product
+        WHERE source_type = 'PERSONAL'
+        AND owner_user_id = #{userId}
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="findPublicProducts" resultMap="ProductItemRowMap">
+        SELECT <include refid="ProductColumns"/>
+        FROM investment_product
+        WHERE source_type = 'PUBLIC'
+        AND owner_user_id IS NULL
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="countPersonalProducts" resultType="int">
+        SELECT COUNT(1)
+        FROM investment_product
+        WHERE source_type = 'PERSONAL'
+        AND owner_user_id = #{userId}
+    </select>
+
+    <select id="search" resultMap="ProductItemRowMap">
+        SELECT <include refid="ProductColumns"/>
+        FROM investment_product
+        <where>
+            <choose>
+                <when test="sourceMode != null and sourceMode.name() == 'PERSONAL'">
+                    source_type = 'PERSONAL'
+                    AND owner_user_id = #{userId}
+                </when>
+                <otherwise>
+                    source_type = 'PUBLIC'
+                    AND owner_user_id IS NULL
+                </otherwise>
+            </choose>
+            AND status IN ('AVAILABLE', 'ON_SALE')
+            AND (#{riskPreferenceJson} = '[]' OR risk_level IS NOT NULL)
+            AND (#{investmentHorizonJson} = '[]' OR JSON_OVERLAPS(JSON_ARRAY(investment_horizon), #{investmentHorizonJson}))
+            AND (#{liquidityNeedJson} = '[]' OR JSON_OVERLAPS(JSON_ARRAY(liquidity_type), #{liquidityNeedJson}))
+            AND (#{productTypeJson} = '[]' OR JSON_OVERLAPS(JSON_ARRAY(product_type), #{productTypeJson}))
+            AND (#{returnExpectationJson} = '[]' OR JSON_OVERLAPS(JSON_ARRAY(return_type), #{returnExpectationJson}))
+            AND (#{customerProfileJson} = '[]' OR JSON_OVERLAPS(target_customer, #{customerProfileJson}))
+            AND (#{restrictionJson} = '[]' OR NOT JSON_OVERLAPS(tags, #{restrictionJson}))
+        </where>
+        ORDER BY updated_at DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
+

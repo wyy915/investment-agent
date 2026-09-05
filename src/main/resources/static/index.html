@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>银行理财投顾辅助系统</title>
+    <link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <a class="brand" href="#/investment" aria-label="回到投顾辅助首页">
+            <span class="brand-mark">A</span>
+            <span>
+                    <strong>理财投顾辅助</strong>
+                    <small>内部筛选，合规先行</small>
+                </span>
+        </a>
+        <nav class="nav-links" aria-label="主导航">
+            <a href="#/investment" data-nav="/investment">首页</a>
+            <a href="#/investment/chat" data-nav="/investment/chat">投顾对话</a>
+            <a href="#/investment/products/personal" data-nav="/investment/products/personal">产品库</a>
+            <a href="#/investment/products/public" data-nav="/investment/products/public">全行产品</a>
+            <a href="#/admin/traces" data-nav="/admin/traces">Trace</a>
+            <a href="#/admin/evaluations" data-nav="/admin/evaluations">评估</a>
+        </nav>
+        <label class="user-field">
+            <span>用户 ID</span>
+            <input id="userIdInput" type="number" min="1" value="1">
+        </label>
+    </header>
+
+    <main id="app" class="page" tabindex="-1"></main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="./assets/js/api.js"></script>
+<script src="./assets/js/app.js"></script>
+</body>
+</html>
+
